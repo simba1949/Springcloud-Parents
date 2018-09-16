@@ -546,7 +546,151 @@ eureka.client.service-url.defaultZone=http://peer1:1111/eureka
 
 ![05](Springcloud学习笔记/05.png)
 
-#### 
+## 客户端负载均衡
 
-##### 
+### Spring Cloud Ribbon
 
+Spring Cloud Ribbon 是基于 HTTP 和 TCP 的客户端负载均衡工具，它基于 Netfix Ribbon 实现。通过 SpringCloud 的封装，可以轻松的将面向服务的 Rest 模板请求自动转换成客户端负载均衡的服务调用。
+
+### RestTemplate 详解
+
+#### GET请求
+
+getForEntity：
+
+```java
+# 1
+<T> ResponseEntity<T> getForEntity(String url, Class<T> responseType, Object... uriVariables) throws RestClientException;
+# 2
+<T> ResponseEntity<T> getForEntity(String url, Class<T> responseType, Map<String, ?> uriVariables)
+			throws RestClientException;
+# 3
+<T> ResponseEntity<T> getForEntity(URI url, Class<T> responseType) throws RestClientException;
+```
+
+> ```
+> String string = restTemplate.getForEntity("http://USER-SERVICE/user?one={1}&two={2}", String.class, "oneParam", "twoParam");
+> ```
+>
+> 访问 USER-SERVICE/user 请求，后面的参数会依次赋值到 url 站位符上
+>
+> ****
+>
+> ```java
+> HashMap<String, String> map = new HashMap<>(16);
+> map.put("one","oneParam");
+> map.put("two","twoParam");
+> String string = restTemplate.getForEntity("http://USER-SERVICE/user?one={one}&two={two}", String.class, map);
+> ```
+>
+> 访问 USER-SERVICE/user 请求，后面的参数会根据占位符的key值，获取 map 中 Value 填补到占位符
+>
+> ****
+>
+> ```java
+> UriComponents uriComponents = UriComponentsBuilder
+>                 .fromUriString("http://USER-SERVICE/user?name={name}&password={pw}")
+>                 .build()
+>                 .expand("libai").expand("666")
+>                 .encode();
+> URI uri = uriComponents.toUri();
+> restTemplate.getForEntity(uri, String.class);
+> 
+> 
+> Map<String,String> map = new HashMap<>(16);
+> map.put("name","libai");
+> map.put("pw","666");
+> UriComponents uriComponentsMap = UriComponentsBuilder
+>                 .fromUriString("http://USER-SERVICE/user?name={name}&password={pw}")
+>                 .build()
+>                 .expand(map)
+>                 .encode();
+> URI uriMap = uriComponentsMap.toUri();
+> restTemplate.getForEntity(uriMap, String.class);
+> 
+> UriComponents uriComponentsValues = UriComponentsBuilder
+>                 .fromUriString("http://USER-SERVICE/user?name={name}&password={pw}")
+>                 .build()
+>                 .expand("libai","666")
+>                 .encode();
+> URI uriValues = uriComponentsValues.toUri();
+> restTemplate.getForEntity(uriValues, String.class);
+> ```
+
+getForObject：
+
+```java
+# 1
+@Nullable
+<T> T getForObject(String url, Class<T> responseType, Object... uriVariables) throws RestClientException;
+# 2
+@Nullable
+<T> T getForObject(String url, Class<T> responseType, Map<String, ?> uriVariables) throws RestClientException;
+# 3
+@Nullable
+<T> T getForObject(URI url, Class<T> responseType) throws RestClientException;
+```
+
+> getForObject 是对 getForEntity 的进一步封装，直接获取响应体中的 Body 参数
+
+#### POST 请求
+
+postForEntity
+
+```java
+# 1
+<T> ResponseEntity<T> postForEntity(String url, @Nullable Object request, Class<T> responseType,
+			Object... uriVariables) throws RestClientException;
+# 2
+<T> ResponseEntity<T> postForEntity(String url, @Nullable Object request, Class<T> responseType,
+			Map<String, ?> uriVariables) throws RestClientException;
+# 3
+<T> ResponseEntity<T> postForEntity(URI url, @Nullable Object request, Class<T> responseType)
+			throws RestClientException;
+```
+
+> 基本上和GET请求差不多，需要请求体重设置请求参数
+
+postForObject
+
+```java
+# 1
+@Nullable
+<T> T postForObject(String url, @Nullable Object request, Class<T> responseType,
+                    Object... uriVariables) throws RestClientException;
+# 2
+@Nullable
+<T> T postForObject(String url, @Nullable Object request, Class<T> responseType,
+                    Map<String, ?> uriVariables) throws RestClientException;    
+# 3
+@Nullable
+<T> T postForObject(URI url, @Nullable Object request, Class<T> responseType) throws RestClientException;
+```
+
+> postForObject是对 postForEntity的进一步封装，直接获取响应体中的 Body 参数
+
+#### PUT 请求
+
+```java
+# 1
+void put(String url, @Nullable Object request, Object... uriVariables) throws RestClientException;
+# 2
+void put(String url, @Nullable Object request, Map<String, ?> uriVariables) throws RestClientException;
+# 3
+void put(URI url, @Nullable Object request) throws RestClientException;
+```
+
+> put 函数为 void 类型，所以没有返回内容，传参和 PostForObject 基本一致
+
+#### DELETE 请求
+
+```java
+# 1
+void delete(String url, Object... uriVariables) throws RestClientException;
+# 2
+void delete(String url, Map<String, ?> uriVariables) throws RestClientException;
+# 3
+void delete(URI url) throws RestClientException;
+```
+
+> delete 请求一般的唯一标识拼接在 url 中，url 指定 Delete 请求位置，uriVariables 绑定 url 中的参数即可

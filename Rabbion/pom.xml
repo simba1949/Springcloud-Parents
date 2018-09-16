@@ -5,17 +5,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>top.simba1949</groupId>
-    <artifactId>Springcloud-Parents</artifactId>
-    <packaging>pom</packaging>
+    <artifactId>Rabbion</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <modules>
-        <module>Eureka-RegistrationCenter</module>
-        <module>Eureka-ServiceProvider</module>
-        <module>Eureka-RegistrationCenter4Highavailability</module>
-        <module>Eureka-Comsumer</module>
-        <module>Eureka-RegistrationCenter4HighavailabilityTwo</module>
-        <module>Rabbion</module>
-    </modules>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -42,5 +33,18 @@
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
         </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-web -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-netflix-ribbon -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-netflix-ribbon</artifactId>
+        </dependency>
+
+
     </dependencies>
 </project>
